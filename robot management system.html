@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Management System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#eef2f7;
+}
+
+/* HEADER */
+header{
+    background:#0d47a1;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+
+header h1{
+    font-size:36px;
+}
+
+/* NAVIGATION */
+nav{
+    background:#1565c0;
+    padding:15px;
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+}
+
+nav button{
+    background:#ff9800;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* CONTAINER */
+.container{
+    padding:20px;
+}
+
+/* DASHBOARD */
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+
+.card h2{
+    color:#0d47a1;
+}
+
+.number{
+    font-size:40px;
+    margin-top:10px;
+    color:#ff9800;
+}
+
+/* FORM */
+.form-section{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+
+.form-section h2{
+    color:#0d47a1;
+    margin-bottom:15px;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+.submit-btn{
+    background:#0d47a1;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:5px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+
+table th{
+    background:#0d47a1;
+    color:white;
+    padding:12px;
+}
+
+table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+.control-btn{
+    background:green;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.delete-btn{
+    background:red;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+/* FOOTER */
+footer{
+    background:#0d47a1;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:20px;
+}
+
+@media(max-width:768px){
+    table{
+        font-size:12px;
+    }
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🤖 Robot Management System</h1>
+    <p>Robot Monitoring & Control Dashboard</p>
+</header>
+
+<nav>
+    <button onclick="showRobots()">Robots</button>
+    <button onclick="showTasks()">Tasks</button>
+    <button onclick="showReports()">Reports</button>
+    <button onclick="showMaintenance()">Maintenance</button>
+</nav>
+
+<div class="container">
+
+    <!-- DASHBOARD -->
+    <div class="dashboard">
+
+        <div class="card">
+            <h2>Total Robots</h2>
+            <div class="number" id="totalRobots">0</div>
+        </div>
+
+        <div class="card">
+            <h2>Active Robots</h2>
+            <div class="number" id="activeRobots">0</div>
+        </div>
+
+        <div class="card">
+            <h2>Offline Robots</h2>
+            <div class="number" id="offlineRobots">0</div>
+        </div>
+
+        <div class="card">
+            <h2>Tasks Completed</h2>
+            <div class="number" id="completedTasks">0</div>
+        </div>
+
+    </div>
+
+    <!-- FORM -->
+    <div class="form-section">
+
+        <h2>Add Robot</h2>
+
+        <input type="text" id="robotName" placeholder="Robot Name">
+
+        <input type="text" id="robotModel" placeholder="Robot Model">
+
+        <select id="robotType">
+            <option>Industrial Robot</option>
+            <option>Security Robot</option>
+            <option>Medical Robot</option>
+            <option>Cleaning Robot</option>
+            <option>Delivery Robot</option>
+        </select>
+
+        <input type="text" id="robotLocation" placeholder="Robot Location">
+
+        <button class="submit-btn" onclick="addRobot()">
+            Add Robot
+        </button>
+
+    </div>
+
+    <!-- ROBOT TABLE -->
+    <table>
+
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Robot Name</th>
+                <th>Model</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Battery</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="robotTable"></tbody>
+
+    </table>
+
+</div>
+
+<footer>
+    Robot Management System Using HTML, CSS, JavaScript, Node.js & SQL
+</footer>
+
+<script>
+
+/*
+=========================================================
+MYSQL DATABASE
+=========================================================
+
+CREATE DATABASE robot_management;
+
+USE robot_management;
+
+CREATE TABLE robots(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    robot_name VARCHAR(100),
+    robot_model VARCHAR(100),
+    robot_type VARCHAR(100),
+    robot_location VARCHAR(100),
+    status VARCHAR(50),
+    battery INT
+);
+
+=========================================================
+NODE.JS SERVER
+=========================================================
+
+const express = require("express");
+const mysql = require("mysql2");
+
+const app = express();
+
+app.use(express.json());
+
+const db = mysql.createConnection({
+    host:"localhost",
+    user:"root",
+    password:"",
+    database:"robot_management"
+});
+
+db.connect();
+
+app.post("/add-robot",(req,res)=>{
+
+    const data = req.body;
+
+    db.query(
+        "INSERT INTO robots(robot_name,robot_model,robot_type,robot_location,status,battery) VALUES(?,?,?,?,?,?)",
+        [
+            data.robot_name,
+            data.robot_model,
+            data.robot_type,
+            data.robot_location,
+            "ACTIVE",
+            100
+        ],
+        (err,result)=>{
+            if(err) throw err;
+
+            res.send("Robot added successfully");
+        }
+    );
+});
+
+app.listen(3000,()=>{
+    console.log("Server running on port 3000");
+});
+
+=========================================================
+*/
+
+// FRONTEND SYSTEM
+
+let robots = [];
+
+let completedTasks = 0;
+
+const robotTable =
+document.getElementById("robotTable");
+
+// UPDATE DASHBOARD
+function updateDashboard(){
+
+    document.getElementById("totalRobots")
+    .innerText = robots.length;
+
+    const active =
+    robots.filter(robot =>
+        robot.status === "ACTIVE"
+    ).length;
+
+    const offline =
+    robots.filter(robot =>
+        robot.status === "OFFLINE"
+    ).length;
+
+    document.getElementById("activeRobots")
+    .innerText = active;
+
+    document.getElementById("offlineRobots")
+    .innerText = offline;
+
+    document.getElementById("completedTasks")
+    .innerText = completedTasks;
+}
+
+// ADD ROBOT
+function addRobot(){
+
+    const robotName =
+    document.getElementById("robotName").value;
+
+    const robotModel =
+    document.getElementById("robotModel").value;
+
+    const robotType =
+    document.getElementById("robotType").value;
+
+    const robotLocation =
+    document.getElementById("robotLocation").value;
+
+    if(
+        !robotName ||
+        !robotModel ||
+        !robotLocation
+    ){
+        alert("Please fill all fields");
+        return;
+    }
+
+    const robot = {
+        id: Date.now(),
+        robotName,
+        robotModel,
+        robotType,
+        robotLocation,
+        status:"ACTIVE",
+        battery:100
+    };
+
+    robots.push(robot);
+
+    renderRobots();
+
+    updateDashboard();
+
+    clearForm();
+
+    alert("Robot added successfully!");
+}
+
+// DISPLAY ROBOTS
+function renderRobots(){
+
+    robotTable.innerHTML = "";
+
+    robots.forEach((robot,index)=>{
+
+        robotTable.innerHTML += `
+        <tr>
+
+            <td>${robot.id}</td>
+
+            <td>${robot.robotName}</td>
+
+            <td>${robot.robotModel}</td>
+
+            <td>${robot.robotType}</td>
+
+            <td>${robot.robotLocation}</td>
+
+            <td>${robot.status}</td>
+
+            <td>${robot.battery}%</td>
+
+            <td>
+
+                <button class="control-btn"
+                onclick="toggleRobot(${index})">
+                    ${robot.status === "ACTIVE"
+                        ? "Shutdown"
+                        : "Start"}
+                </button>
+
+                <button class="delete-btn"
+                onclick="deleteRobot(${index})">
+                    Delete
+                </button>
+
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+// START / STOP ROBOT
+function toggleRobot(index){
+
+    if(robots[index].status === "ACTIVE"){
+
+        robots[index].status = "OFFLINE";
+
+    }else{
+
+        robots[index].status = "ACTIVE";
+
+        completedTasks++;
+    }
+
+    renderRobots();
+
+    updateDashboard();
+}
+
+// DELETE ROBOT
+function deleteRobot(index){
+
+    robots.splice(index,1);
+
+    renderRobots();
+
+    updateDashboard();
+}
+
+// CLEAR FORM
+function clearForm(){
+
+    document.getElementById("robotName").value = "";
+
+    document.getElementById("robotModel").value = "";
+
+    document.getElementById("robotLocation").value = "";
+}
+
+// NAVIGATION DEMO
+function showRobots(){
+    alert("Viewing Robots");
+}
+
+function showTasks(){
+    alert("Viewing Robot Tasks");
+}
+
+function showReports(){
+    alert("Viewing Reports");
+}
+
+function showMaintenance(){
+    alert("Viewing Maintenance");
+}
+
+// BATTERY SIMULATION
+setInterval(()=>{
+
+    robots.forEach(robot=>{
+
+        if(robot.status === "ACTIVE"){
+
+            robot.battery -= 1;
+
+            if(robot.battery <= 0){
+
+                robot.battery = 0;
+
+                robot.status = "OFFLINE";
+            }
+        }
+    });
+
+    renderRobots();
+
+    updateDashboard();
+
+},3000);
+
+// INITIAL LOAD
+updateDashboard();
+
+</script>
+
+</body>
+</html>
